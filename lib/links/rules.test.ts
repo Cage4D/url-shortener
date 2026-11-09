@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { MESSAGES } from "./messages";
-import { normalizeDomain, normalizeUrl, parseCreateLink } from "./rules";
+import { normalizeDomain, normalizeUrl, parseCreateLink, shortUrlFor } from "./rules";
 
 const DOMAIN = "short.cut";
 const url = (raw: string) => normalizeUrl(raw, DOMAIN);
@@ -114,5 +114,19 @@ describe("parseCreateLink", () => {
         error: { field: "alias", message: MESSAGES.aliasTaken },
       });
     }
+  });
+});
+
+describe("shortUrlFor", () => {
+  it("uses https for real domains and http for local dev", () => {
+    expect(shortUrlFor("abc", "short.cut")).toBe("https://short.cut/abc");
+    expect(shortUrlFor("abc", "localhost:3000")).toBe("http://localhost:3000/abc");
+    expect(shortUrlFor("abc", "127.0.0.1:3000")).toBe("http://127.0.0.1:3000/abc");
+  });
+});
+
+describe("own domain in dev", () => {
+  it("says the link is already short even when the domain has no dot", () => {
+    expect(normalizeUrl("localhost:3000/abc", "localhost:3000")).toEqual({ ok: false, message: MESSAGES.ownDomain });
   });
 });

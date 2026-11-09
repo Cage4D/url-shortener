@@ -38,6 +38,13 @@ export function shortDomain(): string {
   return normalizeDomain(process.env.NEXT_PUBLIC_SHORT_DOMAIN || "localhost:3000");
 }
 
+/** Full short URL. Local dev hosts get http, everything else https. */
+export function shortUrlFor(slug: string, domain: string): string {
+  const host = normalizeDomain(domain);
+  const local = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(host);
+  return `${local ? "http" : "https"}://${host}/${slug}`;
+}
+
 export type UrlResult = { ok: true; url: string } | { ok: false; message: string };
 
 export function normalizeUrl(raw: string, domain: string): UrlResult {
@@ -55,12 +62,12 @@ export function normalizeUrl(raw: string, domain: string): UrlResult {
   if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
     return { ok: false, message: MESSAGES.badScheme };
   }
-  if (!parsed.hostname.includes(".")) return { ok: false, message: MESSAGES.noDot };
-
   const own = normalizeDomain(domain);
   if (parsed.host === own || parsed.hostname === own) {
     return { ok: false, message: MESSAGES.ownDomain };
   }
+
+  if (!parsed.hostname.includes(".")) return { ok: false, message: MESSAGES.noDot };
 
   if (parsed.href.length > MAX_URL_LENGTH) return { ok: false, message: MESSAGES.tooLong };
   return { ok: true, url: parsed.href };
