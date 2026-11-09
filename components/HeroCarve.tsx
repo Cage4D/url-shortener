@@ -14,11 +14,13 @@ export function HeroCarve({
   layout,
   width,
   height,
+  shortRef,
   cutRef,
 }: {
   layout: HeroLayout | null;
   width: number;
   height: number;
+  shortRef: Ref<SVGTextElement>;
   cutRef: Ref<SVGTextElement>;
 }) {
   const id = useId().replace(/:/g, "");
@@ -59,6 +61,7 @@ export function HeroCarve({
       <g mask={hole ? `url(#${maskId})` : undefined}>
         <g className={styles.inLeft}>
           <text
+            ref={shortRef}
             className={`${styles.heroText} ${styles.heroShort}`}
             transform={layout?.shortTransform}
             style={{ fontSize }}
