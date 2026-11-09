@@ -2,16 +2,48 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
+  overflow: hidden;
 }
 
 .svg {
   position: absolute;
-  left: 0;
-  top: 0;
+  will-change: transform;
 }
 
 .svg path {
   fill: none;
   stroke: var(--contour);
   stroke-width: 1px;
+}
+
+/* Two slow, out-of-step drifts: barely there unless you watch for it. */
+.driftA {
+  animation: drift-a 48s ease-in-out infinite alternate;
+}
+
+.driftB {
+  animation: drift-b 67s ease-in-out infinite alternate;
+}
+
+@keyframes drift-a {
+  from {
+    transform: translate3d(-6px, 4px, 0);
+  }
+  to {
+    transform: translate3d(8px, -6px, 0);
+  }
+}
+
+@keyframes drift-b {
+  0% {
+    transform: translate3d(5px, 6px, 0);
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate3d(-7px, -4px, 0);
+    opacity: 1;
+  }
 }
