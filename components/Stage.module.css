@@ -140,8 +140,8 @@
   display: none;
 }
 
-.wordShort,
-.wordCut {
+.word {
+  display: block;
   font-family: var(--font-hero);
   font-weight: 900;
   font-size: 31vw;
@@ -150,7 +150,14 @@
   text-transform: uppercase;
   user-select: none;
   pointer-events: none;
+}
+
+/* The skew sits on the inner span so the entrance animation's transform
+   on the outer one doesn't replace it. */
+.word > span {
+  display: block;
   padding: 0 0.08em;
+  transform: skewX(var(--skew));
 }
 
 .wordShort {
@@ -204,10 +211,34 @@
   }
 }
 
+/* Mobile: no carve, no skewed card. SHORT, the card, then CUT, stacked. */
 @media (max-width: 760px) {
   .heroSvg,
   .description,
   .telemetry {
     display: none;
+  }
+
+  .stage {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    min-height: 0;
+    padding: 24px 16px 32px;
+  }
+
+  .split {
+    display: contents;
+  }
+
+  .wordShort {
+    order: 1;
+    align-self: flex-start;
+  }
+
+  .wordCut {
+    order: 3;
+    align-self: flex-end;
   }
 }

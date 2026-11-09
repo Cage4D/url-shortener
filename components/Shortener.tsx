@@ -86,8 +86,12 @@ export function Shortener({ domain }: { domain: string }) {
 
       {/* Mobile stacks the words above and below the card instead. */}
       <div className={styles.split} aria-hidden="true">
-        <span className={`${styles.wordShort} ${styles.inLeft}`}>Short</span>
-        <span className={`${styles.wordCut} ${styles.inRight}`}>Cut</span>
+        <span className={`${styles.word} ${styles.wordShort} ${styles.inLeft}`}>
+          <span>Short</span>
+        </span>
+        <span className={`${styles.word} ${styles.wordCut} ${styles.inRight}`}>
+          <span>Cut</span>
+        </span>
       </div>
 
       <ShortenerCard ref={cardRef} shortener={shortener} domain={domain} />
