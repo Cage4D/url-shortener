@@ -22,7 +22,6 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
   min-height: 44px;
   text-decoration: none;
 }
@@ -76,21 +75,6 @@
   translate: 2px -2px;
 }
 
-/* The slash in the logo cuts across once more on hover. */
-.slash {
-  stroke-dasharray: 12;
-  stroke-dashoffset: 0;
-}
-
-.brand:hover .slash {
-  animation: recut 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-@keyframes recut {
-  from {
-    stroke-dashoffset: 12;
-  }
-}
 
 .footer {
   position: relative;
