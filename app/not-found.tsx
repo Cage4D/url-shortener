@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageFrame } from "@/components/SiteChrome";
+import { TopoBackground } from "@/components/TopoBackground";
 import styles from "./not-found.module.css";
 
 export const metadata: Metadata = {
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <PageFrame>
+    <PageFrame backdrop={<TopoBackground />}>
       <main className={styles.stage}>
         <div className={styles.panel}>
           <p className={styles.code} aria-hidden="true">

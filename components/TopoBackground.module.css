@@ -1,0 +1,17 @@
+.layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.svg path {
+  fill: none;
+  stroke: var(--contour);
+  stroke-width: 1px;
+}
