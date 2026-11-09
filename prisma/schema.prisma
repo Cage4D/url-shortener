@@ -1,0 +1,21 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Link {
+  id        Int      @id @default(autoincrement())
+  // Slug as the user typed it (aliases keep their casing for display).
+  slug      String   @db.VarChar(32)
+  // Lower-cased slug: lookups and uniqueness are case-insensitive.
+  slugKey   String   @unique @map("slug_key") @db.VarChar(32)
+  longUrl   String   @map("long_url") @db.VarChar(2048)
+  clicks    Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("links")
+}
