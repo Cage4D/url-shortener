@@ -181,3 +181,20 @@ export function cachedContourPaths(width: number, height: number): string[] {
   }
   return paths;
 }
+
+export type ContourLine = { d: string; length: number };
+
+/** Split a level's path data into its separate polylines, with their lengths. */
+export function splitLines(d: string): ContourLine[] {
+  return d
+    .split(/(?=M)/)
+    .filter(Boolean)
+    .map((part) => {
+      const nums = part.match(/-?[\d.]+/g)?.map(Number) ?? [];
+      let length = 0;
+      for (let i = 2; i + 1 < nums.length; i += 2) {
+        length += Math.hypot(nums[i] - nums[i - 2], nums[i + 1] - nums[i - 1]);
+      }
+      return { d: part, length };
+    });
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cachedContourPaths, contourPaths } from "./contours";
+import { cachedContourPaths, contourPaths, splitLines } from "./contours";
 
 describe("contourPaths", () => {
   it("is deterministic for a given size", () => {
@@ -19,5 +19,19 @@ describe("contourPaths", () => {
 
   it("caches by rounded size", () => {
     expect(cachedContourPaths(320.2, 200)).toBe(cachedContourPaths(320.4, 200));
+  });
+});
+
+describe("splitLines", () => {
+  it("splits path data into polylines and measures them", () => {
+    expect(splitLines("M0 0L3 4L3 10M5 5L5 6")).toEqual([
+      { d: "M0 0L3 4L3 10", length: 11 },
+      { d: "M5 5L5 6", length: 1 },
+    ]);
+  });
+
+  it("covers every line in a real map", () => {
+    const d = contourPaths(640, 400)[3];
+    expect(splitLines(d).map((l) => l.d).join("")).toBe(d);
   });
 });
