@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type FormEvent } from "react";
+import { aliasFromUrl } from "@/lib/links/alias";
 import { MESSAGES } from "@/lib/links/messages";
 import { parseCreateLink, type FieldError } from "@/lib/links/rules";
 import { recentLinks, type RecentLink } from "@/lib/recent";
@@ -32,6 +33,9 @@ export function useShortener(domain: string) {
   const [url, setUrl] = useState("");
   const [alias, setAlias] = useState("");
   const [showAlias, setShowAlias] = useState(false);
+  // The alias follows the link until someone types their own. Emptying the
+  // alias field hands it back to the link.
+  const [aliasFollowsUrl, setAliasFollowsUrl] = useState(true);
   const [status, setStatus] = useState<Status>("idle");
   // The last error and result stay in state after they're dismissed so
   // they can animate out; status decides whether they're showing.
@@ -60,16 +64,23 @@ export function useShortener(domain: string) {
   const onUrlChange = (value: string) => {
     setUrl(value);
     clearErrorFor("url");
+    if (aliasFollowsUrl && showAlias) {
+      setAlias(aliasFromUrl(value));
+      clearErrorFor("alias");
+    }
   };
 
   const onAliasChange = (value: string) => {
     setAlias(value);
+    setAliasFollowsUrl(value === "");
     clearErrorFor("alias");
   };
 
   const toggleAlias = () => {
-    setShowAlias((open) => !open);
-    setAlias("");
+    // Opening starts from the link already typed; closing drops the alias.
+    setAlias(showAlias ? "" : aliasFromUrl(url));
+    setShowAlias(!showAlias);
+    setAliasFollowsUrl(true);
     clearErrorFor("alias");
   };
 
@@ -103,6 +114,7 @@ export function useShortener(domain: string) {
     setStatus("success");
     setUrl("");
     setAlias("");
+    setAliasFollowsUrl(true);
   };
 
   const copy = useCallback(async (text: string, id: string) => {
