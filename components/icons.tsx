@@ -58,3 +58,11 @@ export function Spinner() {
     </svg>
   );
 }
+
+export function CloseIcon() {
+  return (
+    <svg width="14" height="14" strokeWidth="2" {...base}>
+      <path d="M6 6l12 12M18 6 6 18" />
+    </svg>
+  );
+}

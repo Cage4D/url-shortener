@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type Ref } from "react";
 import { Collapse } from "./Collapse";
-import { AlertIcon, ArrowUpRight, CheckIcon, CopyIcon, LinkIcon, Spinner } from "./icons";
+import { AlertIcon, ArrowUpRight, CheckIcon, CloseIcon, CopyIcon, LinkIcon, Spinner } from "./icons";
 import type { Shortener } from "./useShortener";
 import styles from "./ShortenerCard.module.css";
 
@@ -20,6 +20,8 @@ export function ShortenerCard({
   ref?: Ref<HTMLElement>;
 }) {
   const aliasInput = useRef<HTMLInputElement>(null);
+  const urlInput = useRef<HTMLInputElement>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
   const [clearing, setClearing] = useState(false);
   const loading = s.status === "loading";
   const urlError = s.errorVisible && s.error?.field === "url";
@@ -39,6 +41,17 @@ export function ShortenerCard({
     setClearing(false);
   };
 
+  // Hide the result; if focus was inside it, hand it back to the URL field
+  // rather than letting it vanish with the panel.
+  const dismissResult = () => {
+    if (resultRef.current?.contains(document.activeElement)) urlInput.current?.focus({ preventScroll: true });
+    s.dismissResult();
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape" && s.resultVisible) dismissResult();
+  };
+
   const announcement = s.errorVisible
     ? s.error?.message
     : s.resultVisible && s.status === "success"
@@ -46,7 +59,7 @@ export function ShortenerCard({
       : "";
 
   return (
-    <section ref={ref} className={styles.card} aria-label="Shorten a link">
+    <section ref={ref} className={styles.card} aria-label="Shorten a link" onKeyDown={onKeyDown}>
       {/* The slant lives on this inner box, not the section: Chrome puts the
           section on its own GPU layer, and a skewed layer gets resampled,
           which blurs the (counter-skewed) text inside it. */}
@@ -60,6 +73,7 @@ export function ShortenerCard({
               <LinkIcon />
             </span>
             <input
+              ref={urlInput}
               className={`up ${styles.urlInput}`}
               id="long-url"
               name="url"
@@ -144,10 +158,21 @@ export function ShortenerCard({
 
         <Collapse open={s.resultVisible}>
           {s.result && (
-            <div className={styles.result}>
+            <div ref={resultRef} className={styles.result}>
               <div className={styles.resultHead}>
                 <span className="up">Your short link is ready</span>
-                <span className={`up num ${styles.resultTime}`}>{formatTime(s.result.createdAt)}</span>
+                <span className={styles.resultMeta}>
+                  <span className={`up num ${styles.resultTime}`}>{formatTime(s.result.createdAt)}</span>
+                  <button
+                    type="button"
+                    className={styles.dismiss}
+                    onClick={dismissResult}
+                    aria-label="Hide this result"
+                    title="Hide (Esc)"
+                  >
+                    <CloseIcon />
+                  </button>
+                </span>
               </div>
               <div className={styles.resultRow}>
                 <a

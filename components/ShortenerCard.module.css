@@ -25,7 +25,8 @@
 .iconButton,
 .rowCopy,
 .toggle,
-.clear {
+.clear,
+.dismiss {
   transition:
     scale 0.16s var(--ease-out),
     background-color 0.15s,
@@ -39,7 +40,8 @@
 .iconButton:active,
 .rowCopy:active,
 .toggle:active,
-.clear:active {
+.clear:active,
+.dismiss:active {
   scale: var(--press);
 }
 
@@ -288,6 +290,40 @@
 
 .resultTime {
   color: var(--muted);
+}
+
+.resultMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Small close button. The hit area is a full 44px, but negative margins
+   keep it from making the header row any taller. */
+.dismiss {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: -14px -14px -14px -8px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.dismiss svg {
+  transition: rotate 0.3s var(--ease-out);
+}
+
+.dismiss:hover {
+  color: var(--fg);
+  background: var(--hover);
+}
+
+.dismiss:hover svg {
+  rotate: 90deg;
 }
 
 .resultRow {
