@@ -8,6 +8,7 @@ const geo: StageGeometry = {
   cardY: 300,
   cardW: 580,
   cardH: 160,
+  shortRatio: 2.1,
   cutRatio: 1.3,
 };
 
@@ -32,9 +33,8 @@ describe("heroLayout", () => {
   it("tucks the lower 42% of SHORT and the top 42% of CUT behind the card", () => {
     const layout = heroLayout(geo);
     const cap = layout.fontSize * 0.72;
-    const [shortX, shortBaseline] = translate(layout.shortTransform);
+    const [, shortBaseline] = translate(layout.shortTransform);
     const [, cutBaseline] = translate(layout.cutTransform);
-    expect(shortX).toBe(28);
     expect((shortBaseline - geo.cardY) / cap).toBeCloseTo(0.42, 2);
     expect((geo.cardY + geo.cardH - (cutBaseline - cap)) / cap).toBeCloseTo(0.42, 2);
   });
@@ -48,6 +48,25 @@ describe("heroLayout", () => {
     const [, cutBaseline] = translate(layout.cutTransform);
     expect(shortBaseline - cap).toBeGreaterThanOrEqual(16 - 0.1);
     expect(cutBaseline).toBeLessThanOrEqual(781 - 16 + 0.1);
+  });
+
+  it("puts SHORT as close to the card's top-left as CUT is to its bottom-right", () => {
+    // A tall card (result plus recent links) shrinks the words.
+    const full = { ...geo, cardY: 72, cardH: 560 };
+    const layout = heroLayout(full);
+    const overhang = layout.fontSize * 0.72 * TAN12;
+    const [shortX] = translate(layout.shortTransform);
+    const [cutX] = translate(layout.cutTransform);
+    const shortTopRight = shortX + 2.1 * layout.fontSize + overhang;
+    // Mirror images through the card's centre (the card looks the same
+    // turned upside down), so the two corners average to the centre.
+    expect(shortX).toBeGreaterThan(28);
+    expect((shortTopRight + cutX) / 2).toBeCloseTo(full.cardX + full.cardW / 2, 1);
+  });
+
+  it("keeps SHORT inside the stage when the card is far left", () => {
+    const [shortX] = translate(heroLayout({ ...geo, cardX: 40 }).shortTransform);
+    expect(shortX).toBe(28);
   });
 
   it("keeps the full width-based size when there's room", () => {
@@ -95,5 +114,6 @@ describe("geometryChanged", () => {
   it("notices when a word's measured width changes, e.g. once the font loads", () => {
     expect(geometryChanged(geo, { ...geo, cutRatio: 1.27 })).toBe(true);
     expect(geometryChanged(geo, { ...geo, cutRatio: 1.3001 })).toBe(false);
+    expect(geometryChanged(geo, { ...geo, shortRatio: 2.05 })).toBe(true);
   });
 });

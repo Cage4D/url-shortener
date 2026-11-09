@@ -12,7 +12,8 @@ export type StageGeometry = {
   cardY: number;
   cardW: number;
   cardH: number;
-  /** CUT's advance width divided by its font size; 0 if not measured. */
+  /** Each word's advance width divided by its font size; 0 if not measured. */
+  shortRatio: number;
   cutRatio: number;
 };
 
@@ -30,7 +31,8 @@ const CARVE_GAP = 14;
 const CARD_RADIUS = 30;
 const INSET = 28;
 const TAN = Math.tan((Math.abs(SKEW_DEG) * Math.PI) / 180);
-// Fallback for CUT's width per pixel of font size until it's been measured.
+// Fallbacks for each word's width per pixel of font size until measured.
+const SHORT_RATIO = 2.15;
 const CUT_RATIO = 1.35;
 // Smallest the hero may shrink to when a tall card leaves it little room.
 const MIN_FONT_SIZE = 96;
@@ -55,10 +57,6 @@ export function heroLayout(g: StageGeometry): HeroLayout {
   const fontSize = Math.max(MIN_FONT_SIZE, Math.min(heroFontSize(g.width), fitsAbove, fitsBelow));
   const cap = fontSize * CAP_HEIGHT;
 
-  // SHORT sits top-left with its baseline pushed below the card's top edge.
-  const shortX = INSET;
-  const shortY = g.cardY + cap * TUCK;
-
   // CUT sits bottom-right; its top tucks under the card's bottom edge.
   // The skew pushes the tops of the letters right by cap * tan(12deg), which
   // the text's advance width doesn't include, so leave room for it too.
@@ -67,10 +65,16 @@ export function heroLayout(g: StageGeometry): HeroLayout {
   const cutX = Math.min(g.width - INSET - cutWidth - overhang, g.cardX + g.cardW - fontSize * 0.45);
   const cutY = cardBottom - cap * TUCK + cap;
 
-  // The hole matches the card plus a gap, skewed around the card's centre
-  // exactly like the card itself is.
+  // The card is skewed about its centre, so it looks the same turned
+  // upside down. SHORT is CUT turned the same way: its top-right corner
+  // lands where CUT's bottom-left corner would, so both words sit the same
+  // distance from their corner of the card. Its baseline sits below the
+  // card's top edge by the same share CUT's top sits above the bottom.
   const cx = g.cardX + g.cardW / 2;
   const cy = g.cardY + g.cardH / 2;
+  const shortWidth = (g.shortRatio || SHORT_RATIO) * fontSize;
+  const shortX = Math.max(INSET, 2 * cx - cutX - shortWidth - overhang);
+  const shortY = g.cardY + cap * TUCK;
 
   return {
     fontSize,
@@ -82,6 +86,8 @@ export function heroLayout(g: StageGeometry): HeroLayout {
       width: g.cardW + CARVE_GAP * 2,
       height: g.cardH + CARVE_GAP * 2,
       r: CARD_RADIUS + CARVE_GAP,
+      // The hole is the card plus a gap, skewed about the card's centre
+      // exactly like the card itself is.
       transform: `translate(${f(cx)} ${f(cy)}) skewX(${SKEW_DEG}) translate(${f(-cx)} ${f(-cy)})`,
     },
   };
@@ -119,12 +125,12 @@ export function readoutClashes(g: StageGeometry): { telemetry: boolean; descript
 
 /**
  * True when two measurements differ enough to matter: half a pixel for
- * sizes, a small fraction for CUT's width ratio (which is around 1.3).
+ * sizes, a small fraction for the words' width ratios (around 1.3 and 2.2).
  */
 export function geometryChanged(a: StageGeometry | null, b: StageGeometry): boolean {
   if (!a) return true;
   return (Object.keys(b) as (keyof StageGeometry)[]).some((k) => {
-    const tolerance = k === "cutRatio" ? 0.002 : 0.5;
+    const tolerance = k === "cutRatio" || k === "shortRatio" ? 0.002 : 0.5;
     return Math.abs(a[k] - b[k]) >= tolerance;
   });
 }

@@ -13,6 +13,7 @@ export function Shortener({ domain }: { domain: string }) {
   const shortener = useShortener(domain);
   const stageRef = useRef<HTMLElement>(null);
   const cardRef = useRef<HTMLElement>(null);
+  const shortRef = useRef<SVGTextElement>(null);
   const cutRef = useRef<SVGTextElement>(null);
   const [geo, setGeo] = useState<StageGeometry | null>(null);
 
@@ -20,7 +21,7 @@ export function Shortener({ domain }: { domain: string }) {
     const stage = stageRef.current;
     const card = cardRef.current;
     if (!stage || !card) return;
-    // CUT's advance width per pixel of font size. 0 when the hero isn't
+    // A word's advance width per pixel of font size. 0 when the hero isn't
     // rendered (e.g. hidden on mobile); the layout then estimates.
     const ratio = (el: SVGTextElement | null) => {
       try {
@@ -37,6 +38,7 @@ export function Shortener({ domain }: { domain: string }) {
       cardY: card.offsetTop,
       cardW: card.offsetWidth,
       cardH: card.offsetHeight,
+      shortRatio: ratio(shortRef.current),
       cutRatio: ratio(cutRef.current),
     };
     setGeo((prev) => (geometryChanged(prev, next) ? next : prev));
@@ -55,7 +57,7 @@ export function Shortener({ domain }: { domain: string }) {
     return () => observer.disconnect();
   }, [measure]);
 
-  // CUT can't be measured until it's been drawn at some size, so measure
+  // The words can't be measured until it's been drawn at some size, so measure
   // once more after the first render and after width changes.
   useLayoutEffect(measure, [measure, geo?.width]);
 
@@ -97,7 +99,7 @@ export function Shortener({ domain }: { domain: string }) {
         </div>
       </dl>
 
-      <HeroCarve layout={layout} width={geo?.width ?? 0} height={geo?.height ?? 0} cutRef={cutRef} />
+      <HeroCarve layout={layout} width={geo?.width ?? 0} height={geo?.height ?? 0} shortRef={shortRef} cutRef={cutRef} />
 
       {/* Mobile stacks the words above and below the card instead. */}
       <div className={styles.split} aria-hidden="true">
