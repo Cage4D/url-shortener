@@ -50,6 +50,25 @@ describe("heroLayout", () => {
     expect(x).toBe(28);
   });
 
+  it("tucks only the top 30% of CUT and the top-left of its C under the card", () => {
+    const layout = heroLayout(geo);
+    const cap = layout.fontSize * 0.72;
+    const [x, baseline] = translate(layout.cutTransform);
+    const carveBottom = geo.cardY + geo.cardH + 14;
+    expect((carveBottom - (baseline - cap)) / cap).toBeCloseTo(0.3, 2);
+    const holeBottomRight = geo.cardX + geo.cardW + 14 - (geo.cardH / 2 + 14) * TAN12;
+    expect(holeBottomRight - x).toBeCloseTo(0.34 * layout.fontSize, 0);
+  });
+
+  it("shrinks the hero on narrow screens instead of burying the C", () => {
+    const narrow = { ...geo, width: 1000, cardX: 210, cardH: 136 };
+    const layout = heroLayout(narrow);
+    expect(layout.fontSize).toBeLessThan(heroFontSize(1000));
+    const [x] = translate(layout.cutTransform);
+    const holeBottomRight = 210 + 580 + 14 - (136 / 2 + 14) * TAN12;
+    expect(holeBottomRight - x).toBeCloseTo(0.34 * layout.fontSize, 0);
+  });
+
   it("follows the card when it grows", () => {
     const taller = heroLayout({ ...geo, cardH: 400 });
     expect(taller.hole.height).toBe(428);

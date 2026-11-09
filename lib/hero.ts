@@ -33,7 +33,13 @@ const SHORT_HIDDEN = 0.3;
 // How far SHORT's tail runs over the card's top-left corner, in font sizes:
 // about the R and the T, whatever the screen width.
 const SHORT_OVERLAP = 0.9;
-const TUCK = 0.42;
+// Same for CUT's top edge under the card's bottom edge.
+const CUT_HIDDEN = 0.3;
+// How far CUT's C slips under the card's (skewed) bottom-right corner, in
+// font sizes. Only the C's top-left goes under, so its outer curve reads.
+const C_UNDER = 0.34;
+// Smallest the hero may shrink to so CUT can stay right of the card.
+const MIN_FONT_SIZE = 96;
 const CARVE_GAP = 14;
 const CARD_RADIUS = 30;
 const INSET = 28;
@@ -49,7 +55,16 @@ export function heroFontSize(stageWidth: number): number {
 }
 
 export function heroLayout(g: StageGeometry): HeroLayout {
-  const fontSize = heroFontSize(g.width);
+  // The hole's right edge where it meets its bottom edge: the skew pulls the
+  // card's bottom-right corner left by half its height times tan(12deg).
+  const holeBottomRight = g.cardX + g.cardW + CARVE_GAP - (g.cardH / 2 + CARVE_GAP) * TAN;
+  const cutRatio = g.cutRatio || CUT_RATIO;
+
+  // Normally 20% of the width. On narrow screens, shrink so CUT still fits
+  // between the card's corner and the right edge, rather than sliding
+  // further under the card and losing its C.
+  const fitsRight = (g.width - INSET - holeBottomRight) / (cutRatio - C_UNDER + CAP_HEIGHT * TAN);
+  const fontSize = Math.max(MIN_FONT_SIZE, Math.min(heroFontSize(g.width), fitsRight));
   const cap = fontSize * CAP_HEIGHT;
 
   // SHORT sits top-left, its lower part tucked behind the card's top edge
@@ -59,13 +74,13 @@ export function heroLayout(g: StageGeometry): HeroLayout {
   const shortX = Math.max(INSET, holeTopLeft + SHORT_OVERLAP * fontSize - shortWidth);
   const shortY = g.cardY - CARVE_GAP + cap * SHORT_HIDDEN;
 
-  // CUT sits bottom-right; its top tucks under the card's bottom edge.
+  // CUT sits bottom-right with its C's top-left under the card's corner.
   // The skew pushes the tops of the letters right by cap * tan(12deg), which
   // the text's advance width doesn't include, so leave room for it too.
-  const cutWidth = (g.cutRatio || CUT_RATIO) * fontSize;
+  const cutWidth = cutRatio * fontSize;
   const overhang = cap * TAN;
-  const cutX = Math.min(g.width - INSET - cutWidth - overhang, g.cardX + g.cardW - fontSize * 0.45);
-  const cutY = g.cardY + g.cardH - cap * TUCK + cap;
+  const cutX = Math.min(g.width - INSET - cutWidth - overhang, holeBottomRight - C_UNDER * fontSize);
+  const cutY = g.cardY + g.cardH + CARVE_GAP - cap * CUT_HIDDEN + cap;
 
   // The hole matches the card plus a gap, skewed around the card's centre
   // exactly like the card itself is.
