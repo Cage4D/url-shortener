@@ -26,7 +26,7 @@
 .rowCopy,
 .toggle,
 .clear,
-.dismiss {
+.panelsToggle {
   transition:
     scale 0.16s var(--ease-out),
     background-color 0.15s,
@@ -41,7 +41,7 @@
 .rowCopy:active,
 .toggle:active,
 .clear:active,
-.dismiss:active {
+.panelsToggle:active {
   scale: var(--press);
 }
 
@@ -247,6 +247,41 @@
   scale: 1 0;
 }
 
+/* Shows or hides the result and recent links together. Mirrors the alias
+   toggle on the other end of the row. */
+.panelsToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 6px;
+  margin-right: -6px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--fg-2);
+  font-size: 13px;
+  animation: rise 0.3s var(--ease-out);
+}
+
+.panelsToggle:hover {
+  color: var(--fg);
+}
+
+.panelsToggle svg {
+  flex: none;
+  color: var(--accent);
+  transition: rotate 0.35s var(--ease-out);
+}
+
+.panelsToggle[data-closed] svg {
+  rotate: 180deg;
+}
+
+.panelsLabel {
+  animation: rise 0.25s var(--ease-out);
+}
+
 .error {
   display: flex;
   align-items: center;
@@ -284,7 +319,6 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin: -4px 0;
   font-size: 13px;
   color: var(--fg-2);
 }
@@ -293,49 +327,6 @@
   color: var(--muted);
 }
 
-.resultMeta {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* "Hide" folds the result away. It's drawn compact so the header row
-   keeps its height; an invisible ::after stretches the tap target to 44px. */
-.dismiss {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 30px;
-  padding: 0 11px 0 9px;
-  border: 1px solid var(--line-3);
-  border-radius: 10px;
-  background: transparent;
-  color: var(--fg-2);
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.dismiss::after {
-  content: "";
-  position: absolute;
-  inset: -7px -4px;
-}
-
-.dismiss svg {
-  flex: none;
-  transition: rotate 0.3s var(--ease-out);
-}
-
-.dismiss:hover {
-  color: var(--fg);
-  background: var(--hover);
-  border-color: rgba(237, 237, 232, 0.24);
-}
-
-.dismiss:hover svg {
-  rotate: 90deg;
-}
 
 .resultRow {
   display: flex;

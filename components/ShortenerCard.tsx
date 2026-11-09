@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type Ref } from "react";
 import { Collapse } from "./Collapse";
-import { AlertIcon, ArrowUpRight, CheckIcon, CloseIcon, CopyIcon, LinkIcon, Spinner } from "./icons";
+import { AlertIcon, ArrowUpRight, CheckIcon, ChevronIcon, CopyIcon, LinkIcon, Spinner } from "./icons";
 import type { Shortener } from "./useShortener";
 import styles from "./ShortenerCard.module.css";
 
@@ -21,7 +21,7 @@ export function ShortenerCard({
 }) {
   const aliasInput = useRef<HTMLInputElement>(null);
   const urlInput = useRef<HTMLInputElement>(null);
-  const resultRef = useRef<HTMLDivElement>(null);
+  const panelsRef = useRef<HTMLDivElement>(null);
   const [clearing, setClearing] = useState(false);
   const loading = s.status === "loading";
   const urlError = s.errorVisible && s.error?.field === "url";
@@ -41,16 +41,25 @@ export function ShortenerCard({
     setClearing(false);
   };
 
-  // Hide the result; if focus was inside it, hand it back to the URL field
-  // rather than letting it vanish with the panel.
-  const dismissResult = () => {
-    if (resultRef.current?.contains(document.activeElement)) urlInput.current?.focus({ preventScroll: true });
-    s.dismissResult();
+  // Show or hide the result and recent links together. When hiding, if
+  // focus was inside them, hand it to the URL field instead of losing it.
+  const togglePanels = () => {
+    if (s.panelsOpen && panelsRef.current?.contains(document.activeElement)) {
+      urlInput.current?.focus({ preventScroll: true });
+    }
+    s.togglePanels();
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape" && s.resultVisible) dismissResult();
+    if (e.key === "Escape" && s.panelsOpen && s.hasPanels) togglePanels();
   };
+
+  const linkCount = s.history.length;
+  const panelsLabel = s.panelsOpen
+    ? "Hide links"
+    : linkCount > 0
+      ? `Show links · ${linkCount}`
+      : "Show result";
 
   const announcement = s.errorVisible
     ? s.error?.message
@@ -139,6 +148,21 @@ export function ShortenerCard({
               <span className={styles.plus} aria-hidden="true" />
               {s.showAlias ? "Remove custom alias" : "Custom alias"}
             </button>
+            {s.hasPanels && (
+              <button
+                type="button"
+                className={`up ${styles.panelsToggle}`}
+                onClick={togglePanels}
+                aria-expanded={s.panelsOpen}
+                aria-controls="link-panels"
+                data-closed={!s.panelsOpen || undefined}
+              >
+                <span key={panelsLabel} className={styles.panelsLabel}>
+                  {panelsLabel}
+                </span>
+                <ChevronIcon />
+              </button>
+            )}
           </div>
         </form>
 
@@ -156,105 +180,101 @@ export function ShortenerCard({
           </p>
         </Collapse>
 
-        <Collapse open={s.resultVisible}>
-          {s.result && (
-            <div ref={resultRef} className={styles.result}>
-              <div className={styles.resultHead}>
-                <span className="up">Your short link is ready</span>
-                <span className={styles.resultMeta}>
+        <div id="link-panels" ref={panelsRef}>
+          <Collapse open={s.resultVisible}>
+            {s.result && (
+              <div className={styles.result}>
+                <div className={styles.resultHead}>
+                  <span className="up">Your short link is ready</span>
                   <span className={`up num ${styles.resultTime}`}>{formatTime(s.result.createdAt)}</span>
-                  <button type="button" className={styles.dismiss} onClick={dismissResult}>
-                    <CloseIcon />
-                    <span className="up">Hide</span>
-                  </button>
-                </span>
-              </div>
-              <div className={styles.resultRow}>
-                <a
-                  key={s.result.slug}
-                  className={`up ${styles.shortLink}`}
-                  href={s.result.shortUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span className={styles.domain}>{domain}/</span>
-                  <span className={styles.slug}>{s.result.slug}</span>
-                </a>
-                <div className={styles.resultActions}>
+                </div>
+                <div className={styles.resultRow}>
                   <a
+                    key={s.result.slug}
+                    className={`up ${styles.shortLink}`}
                     href={s.result.shortUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={styles.iconButton}
-                    aria-label="Open short link in a new tab"
                   >
-                    <span className={styles.nudge}>
-                      <ArrowUpRight />
-                    </span>
+                    <span className={styles.domain}>{domain}/</span>
+                    <span className={styles.slug}>{s.result.slug}</span>
                   </a>
-                  <button
-                    type="button"
-                    className={styles.copyButton}
-                    onClick={() => s.copy(s.result!.shortUrl, "result")}
-                    data-copied={resultCopied || undefined}
-                  >
-                    <span key={resultCopied ? "done" : "idle"} className={styles.copyIcon}>
-                      {resultCopied ? <CheckIcon /> : <CopyIcon />}
-                    </span>
-                    <span className="up">{s.copyLabel("result")}</span>
-                  </button>
+                  <div className={styles.resultActions}>
+                    <a
+                      href={s.result.shortUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.iconButton}
+                      aria-label="Open short link in a new tab"
+                    >
+                      <span className={styles.nudge}>
+                        <ArrowUpRight />
+                      </span>
+                    </a>
+                    <button
+                      type="button"
+                      className={styles.copyButton}
+                      onClick={() => s.copy(s.result!.shortUrl, "result")}
+                      data-copied={resultCopied || undefined}
+                    >
+                      <span key={resultCopied ? "done" : "idle"} className={styles.copyIcon}>
+                        {resultCopied ? <CheckIcon /> : <CopyIcon />}
+                      </span>
+                      <span className="up">{s.copyLabel("result")}</span>
+                    </button>
+                  </div>
                 </div>
+                <p className={`up ${styles.longUrl}`} title={s.result.longUrl}>
+                  {s.result.longUrl}
+                </p>
               </div>
-              <p className={`up ${styles.longUrl}`} title={s.result.longUrl}>
-                {s.result.longUrl}
-              </p>
-            </div>
-          )}
-        </Collapse>
+            )}
+          </Collapse>
 
-        <Collapse open={s.history.length > 0 && !clearing} onSettled={onHistorySettled}>
-          <div className={styles.history}>
-            <div className={styles.historyHead}>
-              <h2 className="up">
-                Recent links <span>saved in this browser</span>
-              </h2>
-              <button type="button" className={`up ${styles.clear}`} onClick={clearHistory}>
-                Clear
-              </button>
-            </div>
-            <ul className={styles.historyList}>
-              {s.history.map((item) => {
-                const id = `h:${item.slug}`;
-                const label = s.copyLabel(id);
-                return (
-                  <li key={item.slug} className={styles.rowWrap}>
-                    <div className={styles.row}>
-                      <div className={`up ${styles.rowText}`}>
-                        <span className={styles.rowShort}>
-                          {domain}/{item.slug}
-                        </span>
-                        <span className={styles.rowLong} title={item.longUrl}>
-                          {item.longUrl}
-                        </span>
+          <Collapse open={s.historyVisible && !clearing} onSettled={onHistorySettled}>
+            <div className={styles.history}>
+              <div className={styles.historyHead}>
+                <h2 className="up">
+                  Recent links <span>saved in this browser</span>
+                </h2>
+                <button type="button" className={`up ${styles.clear}`} onClick={clearHistory}>
+                  Clear
+                </button>
+              </div>
+              <ul className={styles.historyList}>
+                {s.history.map((item) => {
+                  const id = `h:${item.slug}`;
+                  const label = s.copyLabel(id);
+                  return (
+                    <li key={item.slug} className={styles.rowWrap}>
+                      <div className={styles.row}>
+                        <div className={`up ${styles.rowText}`}>
+                          <span className={styles.rowShort}>
+                            {domain}/{item.slug}
+                          </span>
+                          <span className={styles.rowLong} title={item.longUrl}>
+                            {item.longUrl}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          className={styles.rowCopy}
+                          onClick={() => s.copy(item.shortUrl, id)}
+                          aria-label={label === "Copy" ? `Copy ${domain}/${item.slug}` : label}
+                          data-copied={(s.copied?.id === id && s.copied.ok) || undefined}
+                        >
+                          <span key={label} className={`up ${styles.rowCopyLabel}`}>
+                            {label}
+                          </span>
+                        </button>
                       </div>
-                      <button
-                        type="button"
-                        className={styles.rowCopy}
-                        onClick={() => s.copy(item.shortUrl, id)}
-                        aria-label={label === "Copy" ? `Copy ${domain}/${item.slug}` : label}
-                        data-copied={(s.copied?.id === id && s.copied.ok) || undefined}
-                      >
-                        <span key={label} className={`up ${styles.rowCopyLabel}`}>
-                          {label}
-                        </span>
-                      </button>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </Collapse>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </Collapse>
+        </div>
       </div>
     </section>
   );

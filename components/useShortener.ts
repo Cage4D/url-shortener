@@ -38,8 +38,9 @@ export function useShortener(domain: string) {
   const [error, setError] = useState<FieldError | null>(null);
   const [errorCount, setErrorCount] = useState(0);
   const [result, setResult] = useState<RecentLink | null>(null);
-  // Lets people put the result away and get back to the plain form.
-  const [resultOpen, setResultOpen] = useState(false);
+  // Whether the result and recent links are showing. People can put them
+  // away to get back to the plain form; a new link opens them again.
+  const [panelsOpen, setPanelsOpen] = useState(true);
   const [copied, setCopied] = useState<CopyState>(null);
   const copyTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -98,7 +99,7 @@ export function useShortener(domain: string) {
     };
     recentLinks.add(link);
     setResult(link);
-    setResultOpen(true);
+    setPanelsOpen(true);
     setStatus("success");
     setUrl("");
     setAlias("");
@@ -130,8 +131,11 @@ export function useShortener(domain: string) {
     errorCount,
     errorVisible: status === "error" && error !== null,
     result,
-    resultVisible: result !== null && resultOpen && status !== "error",
-    dismissResult: () => setResultOpen(false),
+    panelsOpen,
+    hasPanels: result !== null || history.length > 0,
+    resultVisible: result !== null && panelsOpen && status !== "error",
+    historyVisible: history.length > 0 && panelsOpen,
+    togglePanels: () => setPanelsOpen((open) => !open),
     history,
     copied,
     onUrlChange,
