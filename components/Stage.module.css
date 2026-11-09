@@ -6,7 +6,9 @@
   align-items: center;
   justify-items: center;
   padding: 56px 32px;
-  min-height: 640px;
+  /* Enough for SHORT above and CUT below an empty card, small enough to
+     fit a laptop screen without scrolling. */
+  min-height: 480px;
 }
 
 /* Corner brackets */

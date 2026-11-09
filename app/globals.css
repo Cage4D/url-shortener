@@ -44,6 +44,20 @@ body {
   background: var(--bg);
 }
 
+/* No visible scrollbars anywhere. Content that doesn't fit can still be
+   scrolled with a wheel, trackpad or touch; the bar just isn't drawn. */
+html {
+  scrollbar-width: none;
+}
+
+* {
+  scrollbar-width: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
 body {
   color: var(--fg);
   font-family: var(--font-ui);
@@ -99,4 +113,17 @@ input::placeholder {
 
 .num {
   font-variant-numeric: tabular-nums;
+}
+
+/* Respect reduced motion everywhere: animations finish instantly and
+   loops (like the contour drift) stop. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
 }
