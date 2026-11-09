@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { geometryChanged, heroFontSize, heroLayout, type StageGeometry } from "./hero";
+import { geometryChanged, heroFontSize, heroLayout, readoutClashes, type StageGeometry } from "./hero";
 
 const geo: StageGeometry = {
   width: 1440,
@@ -69,6 +69,21 @@ describe("heroLayout", () => {
     expect(holeBottomRight - x).toBeCloseTo(0.34 * layout.fontSize, 0);
   });
 
+  it("shrinks the words to keep them inside the stage when the card is tall", () => {
+    const full = { ...geo, height: 781, cardY: 135, cardH: 512 };
+    const layout = heroLayout(full);
+    const cap = layout.fontSize * 0.72;
+    expect(layout.fontSize).toBeLessThan(heroFontSize(1440));
+    const [, shortBaseline] = translate(layout.shortTransform);
+    const [, cutBaseline] = translate(layout.cutTransform);
+    expect(shortBaseline - cap).toBeGreaterThanOrEqual(16 - 0.1);
+    expect(cutBaseline).toBeLessThanOrEqual(781 - 16 + 0.1);
+  });
+
+  it("keeps the full width-based size when there's room", () => {
+    expect(heroLayout({ ...geo, height: 900 }).fontSize).toBe(heroFontSize(1440));
+  });
+
   it("follows the card when it grows", () => {
     const taller = heroLayout({ ...geo, cardH: 400 });
     expect(taller.hole.height).toBe(428);
@@ -80,6 +95,22 @@ describe("heroLayout", () => {
     const [x] = translate(layout.cutTransform);
     const overhang = layout.fontSize * 0.72 * TAN12;
     expect(x + 2 * layout.fontSize + overhang).toBeLessThanOrEqual(geo.width - 28 + 0.1);
+  });
+});
+
+describe("readoutClashes", () => {
+  it("leaves the readouts alone when the card is clear of them", () => {
+    expect(readoutClashes(geo)).toEqual({ telemetry: false, description: false });
+  });
+
+  it("flags the telemetry when a tall card reaches the top-right on a narrow screen", () => {
+    const full = { ...geo, width: 1000, height: 681, cardX: 210, cardY: 60, cardH: 560 };
+    expect(readoutClashes(full).telemetry).toBe(true);
+  });
+
+  it("flags the description when the card's lower-left reaches it", () => {
+    const low = { ...geo, width: 1000, height: 681, cardX: 210, cardY: 60, cardH: 600 };
+    expect(readoutClashes(low).description).toBe(true);
   });
 });
 

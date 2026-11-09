@@ -115,6 +115,20 @@
   }
 }
 
+/* When the card grows into a readout, the readout fades out of its way. */
+.description,
+.telemetry {
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s;
+}
+
+.description[data-hidden],
+.telemetry[data-hidden] {
+  opacity: 0;
+  visibility: hidden;
+}
+
 /* Desktop hero */
 
 .heroSvg {

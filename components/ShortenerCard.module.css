@@ -464,12 +464,21 @@
   color: var(--fg);
 }
 
+/* Three rows (52px each), then the list scrolls inside the card so a full
+   history doesn't push the hero around. */
 .historyList {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
+  max-height: 156px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.historyList[data-more] {
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 36px), transparent);
 }
 
 /* New rows open up from nothing so the list grows smoothly. */

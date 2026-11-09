@@ -38,8 +38,10 @@ const CUT_HIDDEN = 0.3;
 // How far CUT's C slips under the card's (skewed) bottom-right corner, in
 // font sizes. Only the C's top-left goes under, so its outer curve reads.
 const C_UNDER = 0.34;
-// Smallest the hero may shrink to so CUT can stay right of the card.
+// Smallest the hero may shrink to when the card leaves it little room.
 const MIN_FONT_SIZE = 96;
+// Clear space kept between the words and the stage's top and bottom.
+const EDGE = 16;
 const CARVE_GAP = 14;
 const CARD_RADIUS = 30;
 const INSET = 28;
@@ -60,11 +62,20 @@ export function heroLayout(g: StageGeometry): HeroLayout {
   const holeBottomRight = g.cardX + g.cardW + CARVE_GAP - (g.cardH / 2 + CARVE_GAP) * TAN;
   const cutRatio = g.cutRatio || CUT_RATIO;
 
-  // Normally 20% of the width. On narrow screens, shrink so CUT still fits
-  // between the card's corner and the right edge, rather than sliding
-  // further under the card and losing its C.
+  // Normally 20% of the width, but shrink when the card leaves less room:
+  // - so CUT still fits between the card's corner and the right edge,
+  //   rather than sliding further under the card and losing its C;
+  // - so SHORT and CUT stay inside the stage when the card is tall (a
+  //   result plus recent links), instead of running into the header and
+  //   footer. The words grow back as the card shrinks.
+  const cardBottom = g.cardY + g.cardH;
   const fitsRight = (g.width - INSET - holeBottomRight) / (cutRatio - C_UNDER + CAP_HEIGHT * TAN);
-  const fontSize = Math.max(MIN_FONT_SIZE, Math.min(heroFontSize(g.width), fitsRight));
+  const fitsAbove = (g.cardY - CARVE_GAP - EDGE) / (CAP_HEIGHT * (1 - SHORT_HIDDEN));
+  const fitsBelow = (g.height - cardBottom - CARVE_GAP - EDGE) / (CAP_HEIGHT * (1 - CUT_HIDDEN));
+  const fontSize = Math.max(
+    MIN_FONT_SIZE,
+    Math.min(heroFontSize(g.width), fitsRight, fitsAbove, fitsBelow),
+  );
   const cap = fontSize * CAP_HEIGHT;
 
   // SHORT sits top-left, its lower part tucked behind the card's top edge
@@ -100,6 +111,36 @@ export function heroLayout(g: StageGeometry): HeroLayout {
       transform: `translate(${f(cx)} ${f(cy)}) skewX(${SKEW_DEG}) translate(${f(-cx)} ${f(-cy)})`,
     },
   };
+}
+
+// Where the small readouts sit in the stage (mirrors Stage.module.css),
+// plus a little clearance.
+const TELEMETRY = { right: 40, top: 36, width: 240, height: 60 };
+const DESCRIPTION = { left: 40, bottom: 36, width: 290, height: 44 };
+const CLEARANCE = 8;
+
+/**
+ * Which readouts the (skewed) card would run into. The card's sides lean:
+ * at height y its edges are shifted by (centre y - y) * tan(12deg).
+ */
+export function readoutClashes(g: StageGeometry): { telemetry: boolean; description: boolean } {
+  const cy = g.cardY + g.cardH / 2;
+  const cardBottom = g.cardY + g.cardH;
+  const shift = (y: number) => (cy - y) * TAN;
+
+  const tTop = TELEMETRY.top - CLEARANCE;
+  const tBottom = TELEMETRY.top + TELEMETRY.height + CLEARANCE;
+  const tLeft = g.width - TELEMETRY.right - TELEMETRY.width - CLEARANCE;
+  const yt = Math.max(g.cardY, tTop); // highest card row level with the readout
+  const telemetry = g.cardY < tBottom && cardBottom > tTop && g.cardX + g.cardW + shift(yt) > tLeft;
+
+  const dBottom = g.height - DESCRIPTION.bottom + CLEARANCE;
+  const dTop = g.height - DESCRIPTION.bottom - DESCRIPTION.height - CLEARANCE;
+  const dRight = DESCRIPTION.left + DESCRIPTION.width + CLEARANCE;
+  const yd = Math.min(cardBottom, dBottom); // lowest card row level with the readout
+  const description = cardBottom > dTop && g.cardY < dBottom && g.cardX + shift(yd) < dRight;
+
+  return { telemetry, description };
 }
 
 /**

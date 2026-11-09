@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
-import { geometryChanged, heroLayout, type StageGeometry } from "@/lib/hero";
+import { geometryChanged, heroLayout, readoutClashes, type StageGeometry } from "@/lib/hero";
 import { HeroCarve } from "./HeroCarve";
 import { ShortenerCard } from "./ShortenerCard";
 import { useShortener } from "./useShortener";
@@ -61,6 +61,8 @@ export function Shortener({ domain }: { domain: string }) {
   useLayoutEffect(measure, [measure, geo?.width]);
 
   const layout = geo && geo.width > 0 ? heroLayout(geo) : null;
+  // The readouts step aside when a tall card would run into them.
+  const clashes = geo && geo.width > 0 ? readoutClashes(geo) : { telemetry: false, description: false };
   const { result: lastResult, history } = shortener;
   const saved = lastResult ? Math.max(0, lastResult.longUrl.length - lastResult.shortUrl.length) : null;
 
@@ -73,11 +75,11 @@ export function Shortener({ domain }: { domain: string }) {
       <span className={`${styles.corner} ${styles.bl}`} aria-hidden="true" />
       <span className={`${styles.corner} ${styles.br}`} aria-hidden="true" />
 
-      <p className={styles.description}>
+      <p className={styles.description} data-hidden={clashes.description || undefined}>
         Paste a long link and get a short one you can share anywhere. No account needed.
       </p>
 
-      <dl className={styles.telemetry} aria-label="Your stats on this device">
+      <dl className={styles.telemetry} aria-label="Your stats on this device" data-hidden={clashes.telemetry || undefined}>
         <div className={styles.telemetryRow}>
           <dt>Characters saved</dt>
           <dd className={`num ${styles.accentValue}`}>

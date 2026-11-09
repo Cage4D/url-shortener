@@ -22,6 +22,8 @@ export function ShortenerCard({
   const aliasInput = useRef<HTMLInputElement>(null);
   const urlInput = useRef<HTMLInputElement>(null);
   const panelsRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+  const [listHasMore, setListHasMore] = useState(false);
   const [clearing, setClearing] = useState(false);
   const loading = s.status === "loading";
   const urlError = s.errorVisible && s.error?.field === "url";
@@ -32,6 +34,22 @@ export function ShortenerCard({
   useEffect(() => {
     if (s.showAlias) aliasInput.current?.focus({ preventScroll: true });
   }, [s.showAlias]);
+
+  // The list shows three rows and scrolls for the rest. Fade its bottom edge
+  // while there's more below, since scrollbars are hidden site-wide.
+  const updateListFade = () => {
+    const el = listRef.current;
+    if (el) setListHasMore(el.scrollTop + el.clientHeight < el.scrollHeight - 2);
+  };
+
+  // A new link lands at the top, so bring the list back there.
+  const newest = s.history[0]?.slug;
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    el.scrollTop = 0;
+    updateListFade();
+  }, [newest, s.history.length]);
 
   // Let the list fold away first, then actually empty it.
   const clearHistory = () => setClearing(true);
@@ -241,7 +259,12 @@ export function ShortenerCard({
                   Clear
                 </button>
               </div>
-              <ul className={styles.historyList}>
+              <ul
+              ref={listRef}
+              className={styles.historyList}
+              onScroll={updateListFade}
+              data-more={listHasMore || undefined}
+            >
                 {s.history.map((item) => {
                   const id = `h:${item.slug}`;
                   const label = s.copyLabel(id);
