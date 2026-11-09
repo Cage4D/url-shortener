@@ -1,12 +1,7 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { PageFrame } from "@/components/SiteChrome";
 import { TopoBackground } from "@/components/TopoBackground";
 import styles from "./not-found.module.css";
-
-export const metadata: Metadata = {
-  title: "Link not found — Shortcut",
-};
 
 export default function NotFound() {
   return (

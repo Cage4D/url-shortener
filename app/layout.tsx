@@ -3,7 +3,7 @@ import { display, mono, sans } from "./fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Shortcut — URL shortener",
+  title: "Shortcut",
   description: "Paste a long link and get a short one you can share anywhere. No account needed.",
 };
 
