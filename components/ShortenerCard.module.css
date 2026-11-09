@@ -1,0 +1,337 @@
+/* Radii are concentric: inner radius = outer radius - padding. */
+
+.card {
+  grid-area: 1 / 1;
+  position: relative;
+  z-index: 2;
+  width: min(580px, 100%);
+  padding: 10px;
+  border-radius: 30px;
+  background: linear-gradient(var(--tint), var(--tint)), var(--bg);
+  border: 1px solid var(--line-2);
+  box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.85);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 6px 16px;
+  border-radius: 22px;
+  background: var(--well);
+  border: 1px solid var(--line-2);
+  transition: border-color 0.15s;
+}
+
+.field:focus-within {
+  border-color: var(--line-focus);
+}
+
+.field[data-invalid] {
+  border-color: var(--error-line);
+}
+
+.fieldIcon {
+  flex: none;
+  display: flex;
+  color: var(--muted);
+}
+
+.urlInput,
+.aliasInput {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--fg);
+  /* 16px keeps iOS from zooming on focus. */
+  font-size: 16px;
+}
+
+.urlInput {
+  height: 48px;
+}
+
+.cta {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 50px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 17px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.cta:hover {
+  filter: brightness(1.06);
+}
+
+.cta:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.aliasField {
+  gap: 2px;
+  height: 50px;
+  padding: 0 16px;
+  border-radius: 18px;
+}
+
+.aliasPrefix {
+  font-family: var(--font-code);
+  font-size: 14px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.aliasInput {
+  height: 44px;
+  font-family: var(--font-code);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 6px;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 6px;
+  margin-left: -6px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--fg-2);
+  font-size: 13px;
+}
+
+.toggleGlyph {
+  color: var(--accent);
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: var(--error-bg);
+  color: var(--error);
+  font-size: 14px;
+}
+
+.error svg {
+  flex: none;
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 4px;
+  padding: 18px 18px 18px 20px;
+  border-radius: 22px;
+  background: var(--well);
+  border: 1px solid rgba(237, 237, 232, 0.1);
+}
+
+.resultHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--fg-2);
+}
+
+.resultTime {
+  color: var(--muted);
+}
+
+.resultRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.shortLink {
+  flex: 1 1 220px;
+  min-width: 0;
+  font-family: var(--font-code);
+  font-size: 22px;
+  font-weight: 500;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  color: var(--fg);
+}
+
+.domain {
+  color: var(--muted);
+}
+
+.resultActions {
+  display: flex;
+  gap: 8px;
+}
+
+.iconButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 15px;
+  border: 1px solid var(--line-3);
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+
+.iconButton:hover,
+.rowCopy:hover {
+  background: var(--hover);
+}
+
+.copyButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 46px;
+  padding: 0 18px;
+  border-radius: 15px;
+  border: 0;
+  background: var(--fg);
+  color: var(--on-light);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.longUrl {
+  margin: 0;
+  font-family: var(--font-code);
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history {
+  margin-top: 8px;
+  padding: 10px 6px 4px;
+  border-top: 1px solid var(--line);
+}
+
+.historyHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+}
+
+.historyHead h2 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg);
+}
+
+.historyHead h2 span {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.clear {
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--fg-2);
+  font-size: 13px;
+}
+
+.historyList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 4px 4px 8px;
+  border-radius: 14px;
+}
+
+.row:hover {
+  background: var(--row-hover);
+}
+
+.rowText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rowShort,
+.rowLong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rowShort {
+  font-family: var(--font-code);
+  font-size: 14px;
+  color: var(--fg);
+}
+
+.rowLong {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.rowCopy {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72px;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 13px;
+  border: 1px solid var(--line-2);
+  background: transparent;
+  color: var(--fg);
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 0.15s;
+}

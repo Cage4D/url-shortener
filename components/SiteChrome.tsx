@@ -1,25 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { siteConfig } from "@/lib/config";
+import { ArrowUpRight } from "./icons";
 import styles from "./chrome.module.css";
-
-export function ArrowUpRight({ size = 14 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M7 17 17 7M8 7h9v9" />
-    </svg>
-  );
-}
 
 function LogoMark() {
   return (
@@ -40,7 +23,7 @@ export function SiteHeader() {
       <nav aria-label="Primary" className={styles.nav}>
         <a href={siteConfig.sourceUrl} className={styles.pill} target="_blank" rel="noopener noreferrer">
           Source
-          <ArrowUpRight />
+          <ArrowUpRight size={14} />
         </a>
       </nav>
     </header>
