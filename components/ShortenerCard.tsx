@@ -163,14 +163,9 @@ export function ShortenerCard({
                 <span className="up">Your short link is ready</span>
                 <span className={styles.resultMeta}>
                   <span className={`up num ${styles.resultTime}`}>{formatTime(s.result.createdAt)}</span>
-                  <button
-                    type="button"
-                    className={styles.dismiss}
-                    onClick={dismissResult}
-                    aria-label="Hide this result"
-                    title="Hide (Esc)"
-                  >
+                  <button type="button" className={styles.dismiss} onClick={dismissResult}>
                     <CloseIcon />
+                    <span className="up">Hide</span>
                   </button>
                 </span>
               </div>

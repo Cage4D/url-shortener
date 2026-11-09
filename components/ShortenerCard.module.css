@@ -284,6 +284,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  margin: -4px 0;
   font-size: 13px;
   color: var(--fg-2);
 }
@@ -295,31 +296,41 @@
 .resultMeta {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 12px;
 }
 
-/* Small close button. The hit area is a full 44px, but negative margins
-   keep it from making the header row any taller. */
+/* "Hide" folds the result away. It's drawn compact so the header row
+   keeps its height; an invisible ::after stretches the tap target to 44px. */
 .dismiss {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  margin: -14px -14px -14px -8px;
-  border: 0;
-  border-radius: 12px;
+  gap: 6px;
+  height: 30px;
+  padding: 0 11px 0 9px;
+  border: 1px solid var(--line-3);
+  border-radius: 10px;
   background: transparent;
-  color: var(--muted);
+  color: var(--fg-2);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.dismiss::after {
+  content: "";
+  position: absolute;
+  inset: -7px -4px;
 }
 
 .dismiss svg {
+  flex: none;
   transition: rotate 0.3s var(--ease-out);
 }
 
 .dismiss:hover {
   color: var(--fg);
   background: var(--hover);
+  border-color: rgba(237, 237, 232, 0.24);
 }
 
 .dismiss:hover svg {
