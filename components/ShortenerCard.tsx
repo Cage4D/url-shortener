@@ -20,6 +20,10 @@ export function ShortenerCard({
   ref?: Ref<HTMLElement>;
 }) {
   const aliasInput = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  // Only the Custom alias button moves focus into the field; opening it
+  // while someone types a link must leave their cursor where it is.
+  const focusAliasOnOpen = useRef(false);
   const urlInput = useRef<HTMLInputElement>(null);
   const panelsRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
@@ -30,9 +34,31 @@ export function ShortenerCard({
   const aliasError = s.errorVisible && s.error?.field === "alias";
   const resultCopied = s.copied?.id === "result" && s.copied.ok;
 
-  // Opening the alias field is a request to type in it.
+  // Opening the alias field from its button is a request to type in it.
   useEffect(() => {
-    if (s.showAlias) aliasInput.current?.focus({ preventScroll: true });
+    if (s.showAlias && focusAliasOnOpen.current) aliasInput.current?.focus({ preventScroll: true });
+    focusAliasOnOpen.current = false;
+  }, [s.showAlias]);
+
+  const toggleAlias = () => {
+    focusAliasOnOpen.current = !s.showAlias;
+    s.toggleAlias();
+  };
+
+  // A tap anywhere outside the form closes an alias field with no link.
+  // Pointer events rather than blur, since Safari doesn't focus buttons
+  // on click and would close the field just before its own toggle runs.
+  const leaveRef = useRef(s.onFormLeave);
+  useEffect(() => {
+    leaveRef.current = s.onFormLeave;
+  });
+  useEffect(() => {
+    if (!s.showAlias) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (!formRef.current?.contains(e.target as Node)) leaveRef.current();
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
   }, [s.showAlias]);
 
   // The list shows three rows and scrolls for the rest. Fade its bottom edge
@@ -88,7 +114,17 @@ export function ShortenerCard({
           section on its own GPU layer, and a skewed layer gets resampled,
           which blurs the (counter-skewed) text inside it. */}
       <div className={styles.surface}>
-        <form onSubmit={s.submit} noValidate className={styles.form}>
+        <form
+          ref={formRef}
+          onSubmit={s.submit}
+          noValidate
+          className={styles.form}
+          onBlur={(e) => {
+            // Tabbing out of the form counts as leaving it too.
+            const next = e.relatedTarget as Node | null;
+            if (next && !e.currentTarget.contains(next)) s.onFormLeave();
+          }}
+        >
           <label htmlFor="long-url" className="sr-only">
             Long URL
           </label>
@@ -156,7 +192,7 @@ export function ShortenerCard({
             <button
               type="button"
               className={`up ${styles.toggle}`}
-              onClick={s.toggleAlias}
+              onClick={toggleAlias}
               aria-expanded={s.showAlias}
               data-open={s.showAlias || undefined}
             >

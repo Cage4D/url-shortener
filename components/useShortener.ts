@@ -36,15 +36,18 @@ export function useShortener(domain: string) {
   // The alias follows the link until someone types their own. Emptying the
   // alias field hands it back to the link.
   const [aliasFollowsUrl, setAliasFollowsUrl] = useState(true);
+  // Set when someone closes the alias field while a link is typed, so it
+  // doesn't pop back open on the next keystroke. Clearing the link resets it.
+  const [aliasDismissed, setAliasDismissed] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   // The last error and result stay in state after they're dismissed so
   // they can animate out; status decides whether they're showing.
   const [error, setError] = useState<FieldError | null>(null);
   const [errorCount, setErrorCount] = useState(0);
   const [result, setResult] = useState<RecentLink | null>(null);
-  // Whether the result and recent links are showing. People can put them
-  // away to get back to the plain form; a new link opens them again.
-  const [panelsOpen, setPanelsOpen] = useState(true);
+  // Whether the result and recent links are showing. They start put away so
+  // a returning visitor sees the plain form; a new link opens them.
+  const [panelsOpen, setPanelsOpen] = useState(false);
   const [copied, setCopied] = useState<CopyState>(null);
   const copyTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -64,10 +67,30 @@ export function useShortener(domain: string) {
   const onUrlChange = (value: string) => {
     setUrl(value);
     clearErrorFor("url");
-    if (aliasFollowsUrl && showAlias) {
+    const typed = value.trim() !== "";
+    if (!typed) setAliasDismissed(false);
+    // Typing a link opens the alias field so people see what it'll be.
+    const opening = typed && !showAlias && !aliasDismissed;
+    if (opening) {
+      setShowAlias(true);
+      setAliasFollowsUrl(true);
+    }
+    if (opening || (aliasFollowsUrl && showAlias)) {
       setAlias(aliasFromUrl(value));
       clearErrorFor("alias");
     }
+  };
+
+  const closeAlias = () => {
+    setShowAlias(false);
+    setAlias("");
+    setAliasFollowsUrl(true);
+    clearErrorFor("alias");
+  };
+
+  /** Focus or a tap went somewhere outside the form. */
+  const onFormLeave = () => {
+    if (showAlias && url.trim() === "") closeAlias();
   };
 
   const onAliasChange = (value: string) => {
@@ -78,9 +101,15 @@ export function useShortener(domain: string) {
 
   const toggleAlias = () => {
     // Opening starts from the link already typed; closing drops the alias.
-    setAlias(showAlias ? "" : aliasFromUrl(url));
-    setShowAlias(!showAlias);
+    if (showAlias) {
+      closeAlias();
+      setAliasDismissed(url.trim() !== "");
+      return;
+    }
+    setAlias(aliasFromUrl(url));
+    setShowAlias(true);
     setAliasFollowsUrl(true);
+    setAliasDismissed(false);
     clearErrorFor("alias");
   };
 
@@ -116,7 +145,9 @@ export function useShortener(domain: string) {
     setStatus("success");
     setUrl("");
     setAlias("");
+    setShowAlias(false);
     setAliasFollowsUrl(true);
+    setAliasDismissed(false);
   };
 
   const copy = useCallback(async (text: string, id: string) => {
@@ -155,6 +186,7 @@ export function useShortener(domain: string) {
     onUrlChange,
     onAliasChange,
     toggleAlias,
+    onFormLeave,
     submit,
     copy,
     copyLabel,
