@@ -55,6 +55,22 @@ set `listen_addresses = '*'` in `postgresql.conf`, add a line for the WSL subnet
 (for example `host all all 172.16.0.0/12 scram-sha-256`), restart the service, and allow port
 5432 through Windows Firewall. The WSL IP can change after a reboot.
 
+## Deploying to Vercel
+
+The app is set up for Vercel with a Neon Postgres database from the Vercel Marketplace.
+
+1. Import the repository as a Vercel project.
+2. Add a Neon database (Storage → Neon) and connect it to the project. This sets
+   `DATABASE_URL` (pooled, used by the app) and `DATABASE_URL_UNPOOLED` (direct, used for
+   migrations).
+3. Set `NEXT_PUBLIC_SHORT_DOMAIN` to the production domain (e.g. `your-app.vercel.app`) and
+   `NEXT_PUBLIC_SOURCE_URL` to the repository link.
+4. Deploy. The `vercel-build` script runs `prisma migrate deploy` before `next build`, so
+   pending migrations are applied on every deploy.
+
+Preview deployments share the production database unless you enable Neon branching for them.
+The rate limit is counted per serverless instance, so it's looser on Vercel than on one server.
+
 ## Scripts
 
 | Command | Does |
@@ -66,6 +82,7 @@ set `listen_addresses = '*'` in `postgresql.conf`, add a line for the WSL subnet
 | `npm test` | Unit tests (Vitest) |
 | `npm run db:migrate` | Create and apply a migration in development |
 | `npm run db:deploy` | Apply pending migrations (CI, production) |
+| `npm run vercel-build` | Migrations, then the production build (used by Vercel) |
 
 ## How it works
 
