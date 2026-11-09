@@ -335,3 +335,14 @@
   font-weight: 500;
   transition: background-color 0.15s;
 }
+
+/* Desktop: the card leans like the hero; its contents lean back upright. */
+@media (min-width: 761px) {
+  .card {
+    transform: skewX(var(--skew));
+  }
+
+  .card :global(.up) {
+    transform: skewX(calc(var(--skew) * -1));
+  }
+}

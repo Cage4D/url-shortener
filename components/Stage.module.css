@@ -1,0 +1,213 @@
+.stage {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  padding: 56px 32px;
+  min-height: 640px;
+}
+
+/* Corner brackets */
+
+.corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 0 solid var(--accent);
+  pointer-events: none;
+}
+
+.tl {
+  top: 16px;
+  left: 16px;
+  border-top-width: 1.5px;
+  border-left-width: 1.5px;
+}
+
+.tr {
+  top: 16px;
+  right: 16px;
+  border-top-width: 1.5px;
+  border-right-width: 1.5px;
+}
+
+.bl {
+  bottom: 16px;
+  left: 16px;
+  border-bottom-width: 1.5px;
+  border-left-width: 1.5px;
+}
+
+.br {
+  bottom: 16px;
+  right: 16px;
+  border-bottom-width: 1.5px;
+  border-right-width: 1.5px;
+}
+
+/* Readouts */
+
+.description {
+  position: absolute;
+  left: 40px;
+  bottom: 36px;
+  z-index: 3;
+  max-width: 290px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--fg-2);
+}
+
+.telemetry {
+  position: absolute;
+  right: 40px;
+  top: 36px;
+  z-index: 3;
+  width: 240px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.telemetryRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 10px 0 0;
+}
+
+.telemetryRow:first-child {
+  padding: 0 0 10px;
+  border-bottom: 1px solid var(--accent);
+}
+
+.telemetryRow dt {
+  font-size: 13px;
+  color: var(--fg-2);
+}
+
+.telemetryRow dd {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.telemetryRow .accentValue {
+  color: var(--accent);
+}
+
+/* Desktop hero */
+
+.heroSvg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.heroText {
+  font-family: var(--font-hero);
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+.heroShort {
+  fill: none;
+  stroke: var(--hero-stroke);
+  stroke-width: 1.5px;
+}
+
+.heroCut {
+  fill: var(--accent);
+  stroke: none;
+}
+
+.carveEdge {
+  fill: none;
+  stroke: var(--hero-stroke);
+  stroke-width: 1.5px;
+}
+
+/* Mobile hero (hidden on desktop) */
+
+.split {
+  display: none;
+}
+
+.wordShort,
+.wordCut {
+  font-family: var(--font-hero);
+  font-weight: 900;
+  font-size: 31vw;
+  line-height: 0.78;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  user-select: none;
+  pointer-events: none;
+  padding: 0 0.08em;
+}
+
+.wordShort {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--hero-stroke);
+}
+
+.wordCut {
+  color: var(--accent);
+}
+
+/* Entrance: SHORT from the left, CUT from the right, then the carve edge. */
+
+@keyframes in-left {
+  from {
+    transform: translateX(-90px);
+    opacity: 0;
+  }
+}
+
+@keyframes in-right {
+  from {
+    transform: translateX(90px);
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.inLeft {
+  animation: in-left 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.inRight {
+  animation: in-right 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.08s both;
+}
+
+.inFade {
+  animation: fade-in 0.35s ease 0.9s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inLeft,
+  .inRight,
+  .inFade {
+    animation: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .heroSvg,
+  .description,
+  .telemetry {
+    display: none;
+  }
+}
