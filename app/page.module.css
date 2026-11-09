@@ -1,0 +1,10 @@
+.stage {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  padding: 56px 32px;
+  min-height: 640px;
+}
