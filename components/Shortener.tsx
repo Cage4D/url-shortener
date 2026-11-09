@@ -2,6 +2,7 @@
 
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { geometryChanged, heroLayout, readoutClashes, type StageGeometry } from "@/lib/hero";
+import { charactersSaved } from "@/lib/stats";
 import { HeroCarve } from "./HeroCarve";
 import { ShortenerCard } from "./ShortenerCard";
 import { useShortener } from "./useShortener";
@@ -64,7 +65,7 @@ export function Shortener({ domain }: { domain: string }) {
   // The readouts step aside when a tall card would run into them.
   const clashes = geo && geo.width > 0 ? readoutClashes(geo) : { telemetry: false, description: false };
   const { result: lastResult, history } = shortener;
-  const saved = lastResult ? Math.max(0, lastResult.longUrl.length - lastResult.shortUrl.length) : null;
+  const saved = lastResult ? charactersSaved(lastResult.longUrl, lastResult.shortUrl) : null;
 
   return (
     <main id="top" ref={stageRef} className={styles.stage}>
