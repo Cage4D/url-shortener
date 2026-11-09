@@ -107,6 +107,14 @@ describe("parseCreateLink", () => {
     });
   });
 
+  it("lets a suggested alias through when it's reserved, for a suffix later", () => {
+    expect(parse({ url: "example.com", alias: "api", aliasSuggested: true })).toMatchObject({
+      ok: true,
+      data: { alias: "api", aliasSuggested: true },
+    });
+    expect(parse({ url: "example.com", alias: "ab", aliasSuggested: true }).ok).toBe(false);
+  });
+
   it("rejects reserved aliases regardless of case", () => {
     for (const alias of ["api", "API", "_next", "static"]) {
       expect(parse({ url: "example.com", alias })).toEqual({

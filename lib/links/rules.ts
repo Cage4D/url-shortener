@@ -81,32 +81,40 @@ export function isReservedAlias(alias: string): boolean {
   return RESERVED_ALIASES.has(alias.toLowerCase());
 }
 
-/** The request body for POST /api/links, shared by the form and the API. */
+/**
+ * The request body for POST /api/links, shared by the form and the API.
+ * `aliasSuggested` marks an alias the form filled in from the link rather
+ * than one the person typed; the server may then add a suffix if it's taken.
+ */
 export function createLinkSchema(domain: string) {
-  return z.object({
-    url: z.string({ error: MESSAGES.empty }).transform((raw, ctx) => {
-      const result = normalizeUrl(raw, domain);
-      if (result.ok) return result.url;
-      ctx.addIssue({ code: "custom", message: result.message });
-      return z.NEVER;
-    }),
-    alias: z
-      .string({ error: MESSAGES.badAlias })
-      .optional()
-      .transform((raw, ctx) => {
-        const alias = raw?.trim();
-        if (!alias) return undefined;
-        if (!ALIAS_PATTERN.test(alias)) {
-          ctx.addIssue({ code: "custom", message: MESSAGES.badAlias });
-          return z.NEVER;
-        }
-        if (isReservedAlias(alias)) {
-          ctx.addIssue({ code: "custom", message: MESSAGES.aliasTaken });
-          return z.NEVER;
-        }
-        return alias;
+  return z
+    .object({
+      url: z.string({ error: MESSAGES.empty }).transform((raw, ctx) => {
+        const result = normalizeUrl(raw, domain);
+        if (result.ok) return result.url;
+        ctx.addIssue({ code: "custom", message: result.message });
+        return z.NEVER;
       }),
-  });
+      alias: z
+        .string({ error: MESSAGES.badAlias })
+        .optional()
+        .transform((raw, ctx) => {
+          const alias = raw?.trim();
+          if (!alias) return undefined;
+          if (!ALIAS_PATTERN.test(alias)) {
+            ctx.addIssue({ code: "custom", message: MESSAGES.badAlias });
+            return z.NEVER;
+          }
+          return alias;
+        }),
+      aliasSuggested: z.boolean().optional().catch(undefined),
+    })
+    .superRefine((body, ctx) => {
+      // A suggested alias that's reserved just gets a suffix instead.
+      if (body.alias && !body.aliasSuggested && isReservedAlias(body.alias)) {
+        ctx.addIssue({ code: "custom", path: ["alias"], message: MESSAGES.aliasTaken });
+      }
+    });
 }
 
 export type CreateLinkInput = z.output<ReturnType<typeof createLinkSchema>>;

@@ -11,7 +11,7 @@ type CopyState = { id: string; ok: boolean } | null;
 
 const COPY_FEEDBACK_MS = 1800;
 
-async function postLink(body: { url: string; alias?: string }): Promise<RecentLink | FieldError> {
+async function postLink(body: { url: string; alias?: string; aliasSuggested?: boolean }): Promise<RecentLink | FieldError> {
   try {
     const res = await fetch("/api/links", {
       method: "POST",
@@ -94,7 +94,9 @@ export function useShortener(domain: string) {
     e.preventDefault();
     if (status === "loading") return;
 
-    const body = { url, alias: showAlias ? alias : undefined };
+    // An alias still following the link is only a suggestion, so the
+    // server may add a suffix if it's taken.
+    const body = { url, alias: showAlias ? alias : undefined, aliasSuggested: showAlias && aliasFollowsUrl };
     const parsed = parseCreateLink(body, domain);
     if (!parsed.ok) return fail(parsed.error);
 
