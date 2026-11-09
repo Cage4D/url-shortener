@@ -45,8 +45,11 @@ export function heroLayout(g: StageGeometry): HeroLayout {
   const shortY = g.cardY + cap * TUCK;
 
   // CUT sits bottom-right; its top tucks under the card's bottom edge.
+  // The skew pushes the tops of the letters right by cap * tan(12deg), which
+  // the text's advance width doesn't include, so leave room for it too.
   const cutWidth = g.cutWidth || fontSize * 1.35;
-  const cutX = Math.min(g.width - INSET - cutWidth, g.cardX + g.cardW - fontSize * 0.45);
+  const overhang = cap * Math.tan((Math.abs(SKEW_DEG) * Math.PI) / 180);
+  const cutX = Math.min(g.width - INSET - cutWidth - overhang, g.cardX + g.cardW - fontSize * 0.45);
   const cutY = g.cardY + g.cardH - cap * TUCK + cap;
 
   // The hole matches the card plus a gap, skewed around the card's centre

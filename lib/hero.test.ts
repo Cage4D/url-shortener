@@ -28,7 +28,8 @@ describe("heroLayout", () => {
   it("keeps CUT inside the stage using its measured width", () => {
     const layout = heroLayout({ ...geo, cutWidth: 400 });
     const x = Number(layout.cutTransform.match(/translate\(([\d.]+)/)![1]);
-    expect(x + 400).toBeLessThanOrEqual(geo.width - 28);
+    const overhang = layout.fontSize * 0.72 * Math.tan((12 * Math.PI) / 180);
+    expect(x + 400 + overhang).toBeLessThanOrEqual(geo.width - 28 + 0.1);
   });
 });
 
