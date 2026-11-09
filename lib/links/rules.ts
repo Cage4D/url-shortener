@@ -35,7 +35,11 @@ export function normalizeDomain(domain: string): string {
 }
 
 export function shortDomain(): string {
-  return normalizeDomain(process.env.NEXT_PUBLIC_SHORT_DOMAIN || "localhost:3000");
+  // Preview deployments don't set a short domain, so they fall back to
+  // their own deployment URL (exposed by Vercel at build time).
+  return normalizeDomain(
+    process.env.NEXT_PUBLIC_SHORT_DOMAIN || process.env.NEXT_PUBLIC_VERCEL_URL || "localhost:3000",
+  );
 }
 
 /** Full short URL. Local dev hosts get http, everything else https. */
