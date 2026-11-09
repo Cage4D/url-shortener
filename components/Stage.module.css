@@ -184,7 +184,9 @@
   color: var(--accent);
 }
 
-/* Entrance: SHORT from the left, CUT from the right, then the carve edge. */
+/* Entrance: SHORT from the left, CUT from the right, then the carve edge.
+   "backwards" hides each one until its delay ends, then lets go entirely;
+   "both" would keep them composited forever and blur the card's text. */
 
 @keyframes in-left {
   from {
@@ -207,15 +209,15 @@
 }
 
 .inLeft {
-  animation: in-left 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: in-left 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
 }
 
 .inRight {
-  animation: in-right 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.08s both;
+  animation: in-right 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.08s backwards;
 }
 
 .inFade {
-  animation: fade-in 0.35s ease 0.9s both;
+  animation: fade-in 0.35s ease 0.9s backwards;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -8,6 +8,9 @@
   position: relative;
   z-index: 2;
   width: min(580px, 100%);
+}
+
+.surface {
   padding: 10px;
   border-radius: 30px;
   background: linear-gradient(var(--tint), var(--tint)), var(--bg);
@@ -142,13 +145,17 @@
 
 .spinner svg {
   flex: none;
-  animation: spin 0.8s linear infinite;
 }
 
 .cta[data-loading] .spinner {
   width: 16px;
   margin-right: 8px;
   opacity: 1;
+}
+
+/* Only spin while visible, so an idle button never holds a GPU layer. */
+.cta[data-loading] .spinner svg {
+  animation: spin 0.8s linear infinite;
 }
 
 .aliasField {
@@ -309,10 +316,12 @@
   color: var(--muted);
 }
 
-/* A fresh slug rises into place. */
+/* A fresh slug rises into place. No fill mode on purpose: an animation
+   that keeps filling stays "active", and Chrome then keeps the text on its
+   own GPU layer, where the card's skew makes it render blurry. */
 .slug {
   display: inline-block;
-  animation: rise 0.45s var(--ease-out) both;
+  animation: rise 0.45s var(--ease-out);
 }
 
 .resultActions {
@@ -429,7 +438,7 @@
 .rowWrap {
   display: grid;
   grid-template-rows: 1fr;
-  animation: row-in 0.42s var(--ease-out) both;
+  animation: row-in 0.42s var(--ease-out);
 }
 
 .row {
@@ -547,7 +556,7 @@
 
 /* Desktop: the card leans like the hero; its contents lean back upright. */
 @media (min-width: 761px) {
-  .card {
+  .surface {
     transform: skewX(var(--skew));
   }
 
