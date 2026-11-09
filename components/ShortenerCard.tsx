@@ -73,11 +73,8 @@ export function ShortenerCard({
   };
 
   const linkCount = s.history.length;
-  const panelsLabel = s.panelsOpen
-    ? "Hide links"
-    : linkCount > 0
-      ? `Show links · ${linkCount}`
-      : "Show result";
+  // It hides the result too, not just the links, so the label names neither.
+  const panelsLabel = s.panelsOpen ? "Hide" : linkCount > 0 ? `Show · ${linkCount}` : "Show";
 
   const announcement = s.errorVisible
     ? s.error?.message
@@ -173,6 +170,7 @@ export function ShortenerCard({
                 onClick={togglePanels}
                 aria-expanded={s.panelsOpen}
                 aria-controls="link-panels"
+                aria-label={s.panelsOpen ? "Hide result and recent links" : "Show result and recent links"}
                 data-closed={!s.panelsOpen || undefined}
               >
                 <span key={panelsLabel} className={styles.panelsLabel}>
