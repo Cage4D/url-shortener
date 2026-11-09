@@ -1,0 +1,24 @@
+.collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 0.38s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.2s ease;
+}
+
+.collapse[data-open] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition:
+    grid-template-rows 0.38s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.28s ease 0.08s;
+}
+
+.inner {
+  min-height: 0;
+  overflow: hidden;
+  /* Room for focus rings and borders that would otherwise be clipped. */
+  margin: -4px;
+  padding: 4px;
+}

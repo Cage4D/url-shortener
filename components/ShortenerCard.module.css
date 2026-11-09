@@ -1,6 +1,9 @@
 /* Radii are concentric: inner radius = outer radius - padding. */
 
 .card {
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --press: 0.96;
+
   grid-area: 1 / 1;
   position: relative;
   z-index: 2;
@@ -12,10 +15,34 @@
   box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.85);
 }
 
+/* Pressable things sink a little. `scale` composes with the counter-skew
+   transform on .up elements instead of replacing it. */
+.cta,
+.copyButton,
+.iconButton,
+.rowCopy,
+.toggle,
+.clear {
+  transition:
+    scale 0.16s var(--ease-out),
+    background-color 0.15s,
+    border-color 0.15s,
+    color 0.15s,
+    filter 0.15s;
+}
+
+.cta:active:not(:disabled),
+.copyButton:active,
+.iconButton:active,
+.rowCopy:active,
+.toggle:active,
+.clear:active {
+  scale: var(--press);
+}
+
 .form {
   display: flex;
   flex-direction: column;
-  gap: 6px;
   margin: 0;
 }
 
@@ -27,21 +54,33 @@
   border-radius: 22px;
   background: var(--well);
   border: 1px solid var(--line-2);
-  transition: border-color 0.15s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.25s;
 }
 
 .field:focus-within {
   border-color: var(--line-focus);
+  box-shadow: 0 0 0 4px rgba(237, 237, 232, 0.04);
 }
 
 .field[data-invalid] {
   border-color: var(--error-line);
+  box-shadow: 0 0 0 4px rgba(255, 122, 89, 0.06);
 }
 
 .fieldIcon {
   flex: none;
   display: flex;
   color: var(--muted);
+  transition:
+    color 0.2s,
+    rotate 0.35s var(--ease-out);
+}
+
+.field:focus-within .fieldIcon {
+  color: var(--fg-2);
+  rotate: -12deg;
 }
 
 .urlInput,
@@ -65,7 +104,6 @@
   flex: none;
   display: flex;
   align-items: center;
-  gap: 8px;
   height: 50px;
   padding: 0 20px;
   border: 0;
@@ -76,18 +114,47 @@
   font-weight: 600;
 }
 
-.cta:hover {
-  filter: brightness(1.06);
+.cta:hover:not(:disabled) {
+  filter: brightness(1.08);
 }
 
 .cta:disabled {
-  opacity: 0.7;
   cursor: progress;
+}
+
+.ctaLabel {
+  display: flex;
+  align-items: center;
+}
+
+/* The spinner takes no room until it's needed, then slides the label over. */
+.spinner {
+  display: flex;
+  width: 0;
+  margin-right: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition:
+    width 0.25s var(--ease-out),
+    margin-right 0.25s var(--ease-out),
+    opacity 0.2s;
+}
+
+.spinner svg {
+  flex: none;
+  animation: spin 0.8s linear infinite;
+}
+
+.cta[data-loading] .spinner {
+  width: 16px;
+  margin-right: 8px;
+  opacity: 1;
 }
 
 .aliasField {
   gap: 2px;
   height: 50px;
+  margin-top: 6px;
   padding: 0 16px;
   border-radius: 18px;
 }
@@ -109,13 +176,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  margin-top: 6px;
   padding: 0 6px;
 }
 
 .toggle {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   min-height: 44px;
   padding: 0 6px;
   margin-left: -6px;
@@ -126,15 +194,55 @@
   font-size: 13px;
 }
 
-.toggleGlyph {
-  color: var(--accent);
+.toggle:hover {
+  color: var(--fg);
+}
+
+/* A plus that folds into a minus when the alias field is open. */
+.plus {
+  position: relative;
+  width: 9px;
+  height: 9px;
+  flex: none;
+  transition: rotate 0.35s var(--ease-out);
+}
+
+.plus::before,
+.plus::after {
+  content: "";
+  position: absolute;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
+.plus::before {
+  left: 0;
+  right: 0;
+  top: 4px;
+  height: 1.5px;
+}
+
+.plus::after {
+  top: 0;
+  bottom: 0;
+  left: 3.75px;
+  width: 1.5px;
+  transition: scale 0.3s var(--ease-out);
+}
+
+.toggle[data-open] .plus {
+  rotate: 180deg;
+}
+
+.toggle[data-open] .plus::after {
+  scale: 1 0;
 }
 
 .error {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0 0 6px;
+  margin: 6px 0 0;
   padding: 10px 14px;
   border-radius: 16px;
   background: var(--error-bg);
@@ -146,11 +254,16 @@
   flex: none;
 }
 
+/* Each new error gives a small shake so a repeated mistake still registers. */
+.errorText {
+  animation: nudge 0.4s var(--ease-out);
+}
+
 .result {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  margin-top: 4px;
+  margin-top: 8px;
   padding: 18px 18px 18px 20px;
   border-radius: 22px;
   background: var(--well);
@@ -196,6 +309,12 @@
   color: var(--muted);
 }
 
+/* A fresh slug rises into place. */
+.slug {
+  display: inline-block;
+  animation: rise 0.45s var(--ease-out) both;
+}
+
 .resultActions {
   display: flex;
   gap: 8px;
@@ -210,12 +329,20 @@
   border-radius: 15px;
   border: 1px solid var(--line-3);
   text-decoration: none;
-  transition: background-color 0.15s;
 }
 
 .iconButton:hover,
 .rowCopy:hover {
   background: var(--hover);
+}
+
+.nudge {
+  display: flex;
+  transition: translate 0.25s var(--ease-out);
+}
+
+.iconButton:hover .nudge {
+  translate: 2px -2px;
 }
 
 .copyButton {
@@ -230,6 +357,15 @@
   color: var(--on-light);
   font-size: 14px;
   font-weight: 600;
+}
+
+.copyButton:hover {
+  filter: brightness(1.06);
+}
+
+.copyIcon {
+  display: flex;
+  animation: pop 0.35s var(--ease-out);
 }
 
 .longUrl {
@@ -277,6 +413,10 @@
   font-size: 13px;
 }
 
+.clear:hover {
+  color: var(--fg);
+}
+
 .historyList {
   list-style: none;
   margin: 0;
@@ -285,12 +425,22 @@
   flex-direction: column;
 }
 
+/* New rows open up from nothing so the list grows smoothly. */
+.rowWrap {
+  display: grid;
+  grid-template-rows: 1fr;
+  animation: row-in 0.42s var(--ease-out) both;
+}
+
 .row {
+  min-height: 0;
+  overflow: hidden;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 4px 4px 4px 8px;
   border-radius: 14px;
+  transition: background-color 0.2s;
 }
 
 .row:hover {
@@ -337,7 +487,62 @@
   color: var(--fg);
   font-size: 13px;
   font-weight: 500;
-  transition: background-color 0.15s;
+}
+
+.rowCopy[data-copied] {
+  border-color: rgba(30, 144, 255, 0.55);
+  color: #fff;
+}
+
+.rowCopyLabel {
+  animation: rise 0.3s var(--ease-out);
+}
+
+@keyframes spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes pop {
+  0% {
+    scale: 0.4;
+    opacity: 0;
+  }
+  60% {
+    scale: 1.15;
+    opacity: 1;
+  }
+}
+
+@keyframes rise {
+  from {
+    translate: 0 6px;
+    opacity: 0;
+  }
+}
+
+@keyframes nudge {
+  0%,
+  100% {
+    translate: 0;
+  }
+  25% {
+    translate: -3px 0;
+  }
+  55% {
+    translate: 3px 0;
+  }
+  80% {
+    translate: -1px 0;
+  }
+}
+
+@keyframes row-in {
+  from {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
 }
 
 /* Desktop: the card leans like the hero; its contents lean back upright. */

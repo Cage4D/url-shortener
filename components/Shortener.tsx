@@ -55,7 +55,7 @@ export function Shortener({ domain }: { domain: string }) {
   useLayoutEffect(measure, [measure, geo?.width]);
 
   const layout = geo && geo.width > 0 ? heroLayout(geo) : null;
-  const { lastResult, history } = shortener;
+  const { result: lastResult, history } = shortener;
   const saved = lastResult ? Math.max(0, lastResult.longUrl.length - lastResult.shortUrl.length) : null;
 
   return (
@@ -74,11 +74,19 @@ export function Shortener({ domain }: { domain: string }) {
       <dl className={styles.telemetry} aria-label="Your stats on this device">
         <div className={styles.telemetryRow}>
           <dt>Characters saved</dt>
-          <dd className={`num ${styles.accentValue}`}>{saved === null ? "—" : saved}</dd>
+          <dd className={`num ${styles.accentValue}`}>
+            <span key={saved ?? "none"} className={styles.tick}>
+              {saved === null ? "—" : saved}
+            </span>
+          </dd>
         </div>
         <div className={styles.telemetryRow}>
           <dt>Links on this device</dt>
-          <dd className="num">{history.length}</dd>
+          <dd className="num">
+            <span key={history.length} className={styles.tick}>
+              {history.length}
+            </span>
+          </dd>
         </div>
       </dl>
 

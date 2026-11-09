@@ -33,7 +33,10 @@ export function useShortener(domain: string) {
   const [alias, setAlias] = useState("");
   const [showAlias, setShowAlias] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
+  // The last error and result stay in state after they're dismissed so
+  // they can animate out; status decides whether they're showing.
   const [error, setError] = useState<FieldError | null>(null);
+  const [errorCount, setErrorCount] = useState(0);
   const [result, setResult] = useState<RecentLink | null>(null);
   const [copied, setCopied] = useState<CopyState>(null);
   const copyTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -47,8 +50,7 @@ export function useShortener(domain: string) {
   useEffect(() => () => clearTimeout(copyTimer.current), []);
 
   const clearErrorFor = (field: FieldError["field"]) => {
-    if (error?.field !== field) return;
-    setError(null);
+    if (status !== "error" || error?.field !== field) return;
     setStatus("idle");
   };
 
@@ -70,6 +72,7 @@ export function useShortener(domain: string) {
 
   const fail = (err: FieldError) => {
     setError(err);
+    setErrorCount((n) => n + 1);
     setStatus("error");
   };
 
@@ -82,7 +85,6 @@ export function useShortener(domain: string) {
     if (!parsed.ok) return fail(parsed.error);
 
     setStatus("loading");
-    setError(null);
     const created = await postLink(parsed.data);
     if ("field" in created) return fail(created);
 
@@ -122,8 +124,10 @@ export function useShortener(domain: string) {
     showAlias,
     status,
     error,
-    result: status === "error" ? null : result,
-    lastResult: result,
+    errorCount,
+    errorVisible: status === "error" && error !== null,
+    result,
+    resultVisible: result !== null && status !== "error",
     history,
     copied,
     onUrlChange,
