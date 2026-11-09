@@ -236,18 +236,15 @@
     display: none;
   }
 
-  /* SHORT, the card and CUT sit in the middle of the screen with the
-     spare height shared equally above, between and below them. The gap
-     is a floor for when the card grows and the spare height runs out. */
+  /* SHORT, the card and CUT form one tight group, centered both ways. */
   .stage {
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    justify-content: space-evenly;
-    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
     min-height: 0;
-    /* Vertical padding matches the gap so all four spaces come out equal. */
-    padding: 12px 16px;
+    padding: 24px 16px;
   }
 
   .split {
@@ -256,11 +253,14 @@
 
   .wordShort {
     order: 1;
-    align-self: flex-start;
   }
 
   .wordCut {
     order: 3;
-    align-self: flex-end;
+  }
+
+  .word {
+    align-self: center;
+    text-align: center;
   }
 }
